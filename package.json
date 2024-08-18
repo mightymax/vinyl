@@ -1,7 +1,12 @@
 {
   "name": "vinyl",
-  "version": "0.0.0",
-  "private": true,
+  "description": "App that renders your collection and wantlist using the Dicogs API.",
+  "version": "1.0.0",
+  "license": "EPL-2.0",
+  "author": {
+    "name": "Mark Lindeman",
+    "url": "https://lindeman.it"
+  },
   "scripts": {
     "start": "DEBUG=vinyl:* node ./bin/www",
     "dev": "DEBUG=vinyl:* nodemon ./bin/www"
