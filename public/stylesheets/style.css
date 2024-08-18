@@ -1,0 +1,16 @@
+body {
+  font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+.card {
+  cursor: pointer;
+}
+
+.dropdown-menu .dropdown-item.actief {
+  font-weight: bold; 
+}
+
+.dropdown-menu .dropdown-item.actief::after {
+  content: '✔️';
+  padding-left: 5px;
+}

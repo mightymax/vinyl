@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <title>Vinylcollectie</title>
+    <script>var defaultTab = 'collection';</script>
+    <script src="/javascripts/app.js"></script>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    </head>
+  <body>
+    <div class="container">
+      <h1 class="mt-1">Vinylcollectie van <span id="username">&hellip;</span></h1>
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#collection-pane" type="button" role="tab" aria-controls="collection-pane" aria-selected="true">Collectie</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#wantlist-pane" type="button" role="tab" aria-controls="wantlist-pane" aria-selected="false">Wensenlijst</button>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Sorteer</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" data-sort-key="artist">Artiest</a></li>
+            <li><a class="dropdown-item" href="#" data-sort-key="year">Jaar</a></li>
+            <li><a class="dropdown-item" href="#" data-sort-key="title">Titel</a></li>
+            <li><a class="dropdown-item actief" href="#" data-sort-key="added">Toegevoegd</a></li>
+          </ul>
+        </li>
+      </ul>
+      <div class="tab-content">
+        <div id="collection-pane" class="tab-pane fade show active pt-2">
+          <div id="collection" class="row"></div>
+        </div>
+        <div id="wantlist-pane" class="tab-pane fade pt-2">
+          <div id="wantlist" class="row"></div>
+        </div>
+      </div>
+      <div class="modal fade" id="release" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">&hellip;</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="text-center">
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+              <dl class="row"></dl>
+              <table class="table caption-top">
+                <caption class="fw-bold">Tracklijst</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" width="1">#</th>
+                    <th scope="col">Titel</th>
+                    <th width="1" scope="col text-end">Duur</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>      
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      
+      window.onload = async () => {
+        if (defaultTab === 'wantlist') {
+          const tab = bootstrap.Tab.getOrCreateInstance(document.querySelector('[data-bs-target="#wantlist-pane"]'))
+          tab.show()
+        }
+        Array.from(document.querySelectorAll('[data-bs-toggle="tab"]'))
+          .forEach(el => el.addEventListener('shown.bs.tab', event => {
+            defaultTab = event.target.dataset.bsTarget.replace(/^\#([a-z]+)-pane$/, '$1')
+          })
+        )
+
+        const app = new App()
+        const releaseModal = new bootstrap.Modal('#release', {})
+        const collection = await app.collection()
+          .then(collection => {
+            app.renderCollection(collection, document.getElementById('collection'), releaseModal)
+            return collection
+          })
+        const wantlist = await app.wantlist()
+          .then(collection => {
+            app.renderCollection(collection, document.getElementById('wantlist'), releaseModal)
+            return collection
+          })
+        app.user().then(user => document.getElementById('username').innerText = user.name)
+        // Array.from(document.querySelectorAll('button[data-bs-toggle="tab"]')).forEach(tabEl => {
+        //   tabEl.addEventListener('shown.bs.tab', event => {
+        //     const ordering = document.querySelector('.nav-item.dropdown')
+        //     if(event.target.dataset.bsTarget === '#wantlist-pane')
+        //       ordering.classList.add('d-none')
+        //     else
+        //       ordering.classList.remove('d-none')
+        //     event.relatedTarget // previous active tab
+        //   })
+        // })
+        Array.from(document.querySelectorAll('[data-sort-key]')).forEach(el => {
+          el.addEventListener('click', (ev) => {
+            Array.from(document.querySelectorAll('.actief')).map(el => el.classList.remove('actief'))
+            ev.preventDefault()
+            const key = ev.currentTarget.dataset.sortKey
+            ev.currentTarget.classList.add('actief')
+            collection.releases = collection.releases.sort(app.sort(key))
+            wantlist.wants = wantlist.wants.sort(app.sort(key))
+            app.renderCollection(defaultTab === 'wantlist' ? collection : wantlist, document.getElementById(defaultTab === 'wantlist' ? 'collection': 'wantlist'), releaseModal)
+            app.renderCollection(defaultTab === 'wantlist' ? wantlist : collection, document.getElementById(defaultTab), releaseModal)
+          })
+        })
+      }
+    </script>
+  </body>
+</html>

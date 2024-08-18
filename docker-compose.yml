@@ -1,0 +1,10 @@
+services:
+  app:
+    build:
+      context: .
+    restart: always
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - ./public:/app/public
+    env_file: '.env'
